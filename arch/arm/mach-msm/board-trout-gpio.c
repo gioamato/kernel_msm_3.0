@@ -128,54 +128,54 @@ static int trout_gpio_get_irq_num(struct gpio_chip *chip, unsigned int gpio, uns
 	return 0;
 }
 
-static void trout_gpio_irq_ack(unsigned int irq)
+static void trout_gpio_irq_ack(struct irq_data *d)
 {
-	int bank = TROUT_INT_TO_BANK(irq);
-	uint8_t mask = TROUT_INT_TO_MASK(irq);
+	int bank = TROUT_INT_TO_BANK(d->irq);
+	uint8_t mask = TROUT_INT_TO_MASK(d->irq);
 	int reg = TROUT_BANK_TO_STAT_REG(bank);
-	/*printk(KERN_INFO "trout_gpio_irq_ack irq %d\n", irq);*/
+	/*printk(KERN_INFO "trout_gpio_irq_ack irq %d\n", d->irq);*/
 	writeb(mask, TROUT_CPLD_BASE + reg);
 }
 
-static void trout_gpio_irq_mask(unsigned int irq)
+static void trout_gpio_irq_mask(struct irq_data *d)
 {
 	unsigned long flags;
 	uint8_t reg_val;
-	int bank = TROUT_INT_TO_BANK(irq);
-	uint8_t mask = TROUT_INT_TO_MASK(irq);
+	int bank = TROUT_INT_TO_BANK(d->irq);
+	uint8_t mask = TROUT_INT_TO_MASK(d->irq);
 	int reg = TROUT_BANK_TO_MASK_REG(bank);
 
 	local_irq_save(flags);
 	reg_val = trout_int_mask[bank] |= mask;
 	/*printk(KERN_INFO "trout_gpio_irq_mask irq %d => %d:%02x\n",
-	       irq, bank, reg_val);*/
+	       d->irq, bank, reg_val);*/
 	if (!trout_suspended)
 		writeb(reg_val, TROUT_CPLD_BASE + reg);
 	local_irq_restore(flags);
 }
 
-static void trout_gpio_irq_unmask(unsigned int irq)
+static void trout_gpio_irq_unmask(struct irq_data *d)
 {
 	unsigned long flags;
 	uint8_t reg_val;
-	int bank = TROUT_INT_TO_BANK(irq);
-	uint8_t mask = TROUT_INT_TO_MASK(irq);
+	int bank = TROUT_INT_TO_BANK(d->irq);
+	uint8_t mask = TROUT_INT_TO_MASK(d->irq);
 	int reg = TROUT_BANK_TO_MASK_REG(bank);
 
 	local_irq_save(flags);
 	reg_val = trout_int_mask[bank] &= ~mask;
 	/*printk(KERN_INFO "trout_gpio_irq_unmask irq %d => %d:%02x\n",
-	       irq, bank, reg_val);*/
+	       d->irq, bank, reg_val);*/
 	if (!trout_suspended)
 		writeb(reg_val, TROUT_CPLD_BASE + reg);
 	local_irq_restore(flags);
 }
 
-int trout_gpio_irq_set_wake(unsigned int irq, unsigned int on)
+int trout_gpio_irq_set_wake(struct irq_data *d, unsigned int on)
 {
 	unsigned long flags;
-	int bank = TROUT_INT_TO_BANK(irq);
-	uint8_t mask = TROUT_INT_TO_MASK(irq);
+	int bank = TROUT_INT_TO_BANK(d->irq);
+	uint8_t mask = TROUT_INT_TO_MASK(d->irq);
 
 	local_irq_save(flags);
 	if(on)
@@ -215,7 +215,7 @@ static void trout_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
 		}
 		int_base += TROUT_INT_BANK0_COUNT;
 	}
-	desc->chip->ack(irq);
+	desc->irq_data.chip->irq_ack(&desc->irq_data);
 }
 
 static int trout_sysdev_suspend(struct sys_device *dev, pm_message_t state)
@@ -242,10 +242,10 @@ int trout_sysdev_resume(struct sys_device *dev)
 
 static struct irq_chip trout_gpio_irq_chip = {
 	.name      = "troutgpio",
-	.ack       = trout_gpio_irq_ack,
-	.mask      = trout_gpio_irq_mask,
-	.unmask    = trout_gpio_irq_unmask,
-	.set_wake  = trout_gpio_irq_set_wake,
+	.irq_ack       = trout_gpio_irq_ack,
+	.irq_mask      = trout_gpio_irq_mask,
+	.irq_unmask    = trout_gpio_irq_unmask,
+	.irq_set_wake  = trout_gpio_irq_set_wake,
 	//.set_type  = trout_gpio_irq_set_type,
 };
 
@@ -285,8 +285,8 @@ static int __init trout_init_gpio(void)
 		writeb(trout_cpld_shadow[i], TROUT_CPLD_BASE + i * 2);
 
 	for(i = TROUT_INT_START; i <= TROUT_INT_END; i++) {
-		set_irq_chip(i, &trout_gpio_irq_chip);
-		set_irq_handler(i, handle_edge_irq);
+		irq_set_chip(i, &trout_gpio_irq_chip);
+		irq_set_handler(i, handle_edge_irq);
 		set_irq_flags(i, IRQF_VALID);
 	}
 

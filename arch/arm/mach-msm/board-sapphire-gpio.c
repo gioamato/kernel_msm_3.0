@@ -296,8 +296,8 @@ int sapphire_init_gpio(void)
 	DBG("%d,%d\r\n", SAPPHIRE_INT_START, SAPPHIRE_INT_END);
 	DBG("NR_MSM_IRQS=%d, NR_GPIO_IRQS=%d\r\n", NR_MSM_IRQS, NR_GPIO_IRQS);
 	for (i = SAPPHIRE_INT_START; i <= SAPPHIRE_INT_END; i++) {
-		set_irq_chip(i, &sapphire_gpio_irq_chip);
-		set_irq_handler(i, handle_edge_irq);
+		irq_set_chip(i, &sapphire_gpio_irq_chip);
+		irq_set_handler(i, handle_edge_irq);
 		set_irq_flags(i, IRQF_VALID);
 	}
 
