@@ -18,23 +18,28 @@
 #include <linux/errno.h>
 #include <linux/io.h>
 #include <linux/spinlock.h>
+#include <linux/jiffies.h>
 #include <mach/msm_iomap.h>
 #include <mach/system.h>
 
 #include "proc_comm.h"
 
-static inline void msm_a2m_int(uint32_t irq)
-{
-#if defined(CONFIG_ARCH_MSM7X30)
-	writel(1 << irq, MSM_GCC_BASE + 0x8);
-#else
-	writel(1, MSM_CSR_BASE + 0x400 + (irq * 4));
+#if defined(CONFIG_ARCH_MSM7X30) || defined(CONFIG_ARCH_MSM8X60)
+#define MSM_TRIG_A2M_INT(n) (writel(1 << n, MSM_GCC_BASE + 0x8))
 #endif
-}
+
+#define MSM_A2M_INT(n) (MSM_CSR_BASE + 0x400 + (n) * 4)
+#define TIMEOUT		15000000
 
 static inline void notify_other_proc_comm(void)
 {
-	msm_a2m_int(6);
+#if defined(CONFIG_ARCH_MSM7X30)
+	MSM_TRIG_A2M_INT(6);
+#elif defined(CONFIG_ARCH_MSM8X60)
+	MSM_TRIG_A2M_INT(5);
+#else
+	writel(1, MSM_A2M_INT(6));
+#endif
 }
 
 #define APP_COMMAND 0x00
@@ -48,6 +53,8 @@ static inline void notify_other_proc_comm(void)
 #define MDM_DATA2   0x1C
 
 static DEFINE_SPINLOCK(proc_comm_lock);
+
+void msm_pm_flush_console(void);
 
 /* The higher level SMD support will install this to
  * provide a way to check for and handle modem restart.
@@ -64,6 +71,10 @@ int (*msm_check_for_modem_crash)(void);
  */
 static int proc_comm_wait_for(void __iomem *addr, unsigned value)
 {
+#ifdef CONFIG_PROC_COMM_TIMEOUT_RESET
+	unsigned long long timeout = TIMEOUT;
+#endif
+
 	for (;;) {
 		if (readl(addr) == value)
 			return 0;
@@ -71,6 +82,24 @@ static int proc_comm_wait_for(void __iomem *addr, unsigned value)
 		if (msm_check_for_modem_crash)
 			if (msm_check_for_modem_crash())
 				return -EAGAIN;
+#ifdef CONFIG_PROC_COMM_TIMEOUT_RESET
+		udelay(1);
+		if (timeout-- == 0) {
+			if (msm_hw_reset_hook) {
+				pr_err("proc_comm: TIMEOUT. modem has probably crashed. Rebooting...\n");
+				dump_stack();
+				msm_pm_flush_console();
+				msm_hw_reset_hook();
+
+				/* in this case the modem or watchdog should reboot us */
+				for (;;)
+					;
+			} else {
+				pr_err("proc_comm: TIMEOUT. modem has probably crashed. Retrying...\n");
+			}
+			timeout = TIMEOUT;
+		}
+#endif
 	}
 }
 
@@ -114,17 +143,4 @@ int msm_proc_comm(unsigned cmd, unsigned *data1, unsigned *data2)
 	return ret;
 }
 
-/*
- * We need to wait for the ARM9 to at least partially boot
- * up before we can continue. Since the ARM9 does resource
- * allocation, if we dont' wait we could end up crashing or in
- * and unknown state. This function should be called early to
- * wait on the ARM9.
- */
-void __init proc_comm_boot_wait(void)
-{
-	void __iomem *base = MSM_SHARED_RAM_BASE;
- 
-	proc_comm_wait_for(base + MDM_STATUS, PCOM_READY);
- 
-}
+

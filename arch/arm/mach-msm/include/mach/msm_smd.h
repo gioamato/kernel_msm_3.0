@@ -14,12 +14,16 @@
  *
  */
 
+#if defined(CONFIG_QCT_LTE)
+#include <mach/lte/msm_smd.h>
+#elif defined(CONFIG_ARCH_MSM8X60)
+#include <mach/msm_smd-8x60.h>
+#endif
+
 #ifndef __ASM_ARCH_MSM_SMD_H
 #define __ASM_ARCH_MSM_SMD_H
 
 typedef struct smd_channel smd_channel_t;
-
-extern int (*msm_check_for_modem_crash)(void);
 
 /* warning: notify() may be called before open returns */
 int smd_open(const char *name, smd_channel_t **ch, void *priv,
@@ -56,7 +60,6 @@ int smd_cur_packet_size(smd_channel_t *ch);
 */
 void smd_kick(smd_channel_t *ch);
 
-
 #if 0
 /* these are interruptable waits which will block you until the specified
 ** number of bytes are readable or writable.
@@ -64,8 +67,12 @@ void smd_kick(smd_channel_t *ch);
 int smd_wait_until_readable(smd_channel_t *ch, int bytes);
 int smd_wait_until_writable(smd_channel_t *ch, int bytes);
 #endif
+int smd_wait_until_opened(smd_channel_t *ch, int timeout_us);
 
-typedef enum {
+int smd_total_fifo_size(smd_channel_t *ch);
+
+typedef enum
+{
 	SMD_PORT_DS = 0,
 	SMD_PORT_DIAG,
 	SMD_PORT_RPC_CALL,
@@ -105,5 +112,19 @@ typedef enum {
 	SMD_PORT_CS_MODEM_DSP,
 	SMD_NUM_PORTS,
 } smd_port_id_type;
+
+#if defined(CONFIG_MSM_N_WAY_SMD)
+enum
+{
+	SMD_APPS_MODEM = 0,
+	SMD_APPS_QDSP,
+	SMD_MODEM_QDSP
+};
+#else
+enum
+{
+	SMD_APPS_MODEM = 0
+};
+#endif
 
 #endif
