@@ -57,47 +57,22 @@ static uint32_t wait_pending;
 
 static struct alarm alarms[ANDROID_ALARM_TYPE_COUNT];
 
-#ifdef CONFIG_BUILD_CIQ
-static int is_set_cmd(unsigned int cmd)
-{
-	if ((ANDROID_ALARM_BASE_CMD(cmd) != ANDROID_ALARM_GET_TIME(0)) &&
-	    (ANDROID_ALARM_BASE_CMD(cmd) != ANDROID_ALARM_GET_TICKS(0)))
-		return 1;
-	return 0;
-}
-#else
-static int is_set_cmd(unsigned int cmd)
-{
-	if (ANDROID_ALARM_BASE_CMD(cmd) != ANDROID_ALARM_GET_TIME(0))
-		return 1;
-	return 0;
-}
-#endif
-
 static long alarm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	int rv = 0;
 	unsigned long flags;
-	long long int tmp_ns;
-	struct timespec tmp;
 	struct timespec new_alarm_time;
 	struct timespec new_rtc_time;
 	struct timespec tmp_time;
-	static struct timespec prev_time = { 0, 0 };
 	enum android_alarm_type alarm_type = ANDROID_ALARM_IOCTL_TO_TYPE(cmd);
 	uint32_t alarm_type_mask = 1U << alarm_type;
 
 	if (alarm_type >= ANDROID_ALARM_TYPE_COUNT)
 		return -EINVAL;
 
-	if (is_set_cmd(cmd)) {
-		if ((file->f_flags & O_ACCMODE) == O_RDONLY) {
-			pr_alarm(INFO, "set cmd not permitted in %s cmd=%d type=%d\n"
-					, __FUNCTION__
-					, ANDROID_ALARM_BASE_CMD(cmd)
-					, alarm_type);
+	if (ANDROID_ALARM_BASE_CMD(cmd) != ANDROID_ALARM_GET_TIME(0)) {
+		if ((file->f_flags & O_ACCMODE) == O_RDONLY)
 			return -EPERM;
-		}
 		if (file->private_data == NULL &&
 		    cmd != ANDROID_ALARM_SET_RTC) {
 			spin_lock_irqsave(&alarm_slock, flags);
@@ -195,20 +170,6 @@ from_old_alarm_set:
 		case ANDROID_ALARM_ELAPSED_REALTIME:
 			tmp_time =
 				ktime_to_timespec(alarm_get_elapsed_realtime());
-			tmp = timespec_sub(tmp_time, prev_time);
-			tmp_ns = timespec_to_ns(&tmp);
-			if (tmp_ns >= 0) {
-				prev_time = tmp_time;
-			} else if (-tmp_ns < 100*1000000) {
-				/* (previous time - current time) < 100ms */
-				tmp_time = prev_time;
-			} else {
-				/* (previous time - current time) >= 100ms */
-				pr_alarm(INFO, "previous time=%lld > current time=%lld\n"
-						, timespec_to_ns(&prev_time)
-						, timespec_to_ns(&tmp_time));
-				tmp_time = prev_time;
-			}
 			break;
 		case ANDROID_ALARM_TYPE_COUNT:
 		case ANDROID_ALARM_SYSTEMTIME:
@@ -221,16 +182,7 @@ from_old_alarm_set:
 			goto err1;
 		}
 		break;
-#ifdef CONFIG_BUILD_CIQ
-	case ANDROID_ALARM_GET_TICKS(0):
-		alarm_get_elapsed_ticks(&tmp_time);
-		if (copy_to_user((void __user *)arg, &tmp_time,
-		    sizeof(tmp_time))) {
-			rv = -EFAULT;
-			goto err1;
-		}
-		break;
-#endif
+
 	default:
 		rv = -EINVAL;
 		goto err1;
@@ -294,6 +246,24 @@ static void alarm_triggered(struct alarm *alarm)
 	spin_unlock_irqrestore(&alarm_slock, flags);
 }
 
+/* For off-mode alarm */
+static int offalarm_enabled;
+static int htc_is_offalarm_enabled(void)
+{
+	return offalarm_enabled;
+}
+EXPORT_SYMBOL(htc_is_offalarm_enabled);
+
+static int __init enable_offalarm_setup(char *str)
+{
+	int cal = simple_strtol(str, NULL, 0);
+
+	offalarm_enabled = cal;
+	return 1;
+}
+__setup("enable_offalarm=", enable_offalarm_setup);
+
+
 static const struct file_operations alarm_fops = {
 	.owner = THIS_MODULE,
 	.unlocked_ioctl = alarm_ioctl,
@@ -303,7 +273,7 @@ static const struct file_operations alarm_fops = {
 
 static struct miscdevice alarm_device = {
 	.minor = MISC_DYNAMIC_MINOR,
-	.name = "alarm",
+	.name = "offmode_alarm",
 	.fops = &alarm_fops,
 };
 
@@ -312,13 +282,16 @@ static int __init alarm_dev_init(void)
 	int err;
 	int i;
 
+	if (!htc_is_offalarm_enabled())
+		return 0;
+
 	err = misc_register(&alarm_device);
 	if (err)
 		return err;
 
 	for (i = 0; i < ANDROID_ALARM_TYPE_COUNT; i++)
 		alarm_init(&alarms[i], i, alarm_triggered);
-	wake_lock_init(&alarm_wake_lock, WAKE_LOCK_SUSPEND, "alarm");
+	wake_lock_init(&alarm_wake_lock, WAKE_LOCK_SUSPEND, "offmode_alarm");
 
 	return 0;
 }
@@ -331,4 +304,3 @@ static void  __exit alarm_dev_exit(void)
 
 module_init(alarm_dev_init);
 module_exit(alarm_dev_exit);
-
