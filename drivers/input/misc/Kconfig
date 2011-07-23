@@ -310,6 +310,12 @@ config INPUT_GPIO
 	help
 	  Say Y here if you want to support gpio based keys, wheels etc...
 
+config INPUT_MICROP
+       tristate "MicroP key driver support"
+       depends on MICROP_COMMON
+       help
+         Say Y here if you want to support uP based keys.
+
 config HP_SDC_RTC
 	tristate "HP SDC Real Time Clock"
 	depends on (GSC || HP300) && SERIO
@@ -419,6 +425,33 @@ config INPUT_PCAP
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called pcap_keys.
+
+config LIGHTSENSOR_MICROP
+        tristate "LIGHTSENSOR MICROP Driver"
+        depends on MICROP_COMMON
+        help
+          HTC LIGHTSENSOR Microp support.
+
+config INPUT_CAPELLA_CM3602
+       tristate "Capella CM3602 proximity and light sensor"
+       help
+         Say Y here to enable the Capella CM3602 Short Distance Proximity
+         Sensor with Ambient Light Sensor.
+
+config LIGHTSENSOR_SMD
+        tristate "LIGHTSENSOR SMD Driver"
+        help
+          HTC LIGHTSENSOR SMD support.
+
+config INPUT_DUMMY_KEYPAD
+       tristate "Dummy Keypad driver support"
+       help
+         Say Y here if you want to support dummy keypad driver, wheels etc...
+
+config LIGHTSENSOR_PMIC
+        tristate "LIGHTSENSOR PMIC Driver"
+        help
+          HTC LIGHTSENSOR PMIC support.
 
 config INPUT_ADXL34X
 	tristate "Analog Devices ADXL34x Three-Axis Digital Accelerometer"

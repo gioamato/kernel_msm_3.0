@@ -89,7 +89,7 @@ static enum hrtimer_restart gpio_event_switch_timer_func(struct hrtimer *timer)
 		npolarity = !(gpio_flags & GPIOEDF_ACTIVE_HIGH);
 		pin_state = gpio_get_value(key_entry->gpio);
 		if (ds->use_irq)
-			set_irq_type(gpio_to_irq(key_entry->gpio), (pin_state ?
+			irq_set_irq_type(gpio_to_irq(key_entry->gpio), (pin_state ?
 				IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH));
 		pressed = pin_state ^ npolarity;
 		if (debounce & DEBOUNCE_POLL) {
@@ -200,7 +200,7 @@ static irqreturn_t gpio_event_switch_irq_handler(int irq, void *dev_id)
 	} else {
 		pin_state = gpio_get_value(key_entry->gpio);
 		pressed = pin_state ^ !(ds->info->flags & GPIOEDF_ACTIVE_HIGH);
-		set_irq_type(irq,
+		irq_set_irq_type(irq,
 			pin_state ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH);
 
 		if (ds->info->flags & GPIOEDF_PRINT_KEYS)

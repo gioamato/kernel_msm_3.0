@@ -50,7 +50,7 @@ static int capella_cm3602_report(struct capella_cm3602_data *data)
 
 	do {
 		value1 = gpio_get_value(data->pdata->p_out);
-		set_irq_type(irq, value1 ?
+		irq_set_irq_type(irq, value1 ?
 				IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH);
 		value2 = gpio_get_value(data->pdata->p_out);
 	} while (value1 != value2 && retry_limit-- > 0);
@@ -104,7 +104,7 @@ static int capella_cm3602_enable(struct capella_cm3602_data *data)
 		capella_cm3602_report(data);
 
 	enable_irq(irq);
-	rc = set_irq_wake(irq, 1);
+	rc = irq_set_irq_wake(irq, 1);
 	if (rc < 0)
 		EPS("%s: failed to set irq %d as a wake interrupt\n",
 			__func__, irq);
@@ -123,7 +123,7 @@ static int capella_cm3602_disable(struct capella_cm3602_data *data)
 	return 0;
 }
 	disable_irq(irq);
-	rc = set_irq_wake(irq, 0);
+	rc = irq_set_irq_wake(irq, 0);
 	if (rc < 0)
 		EPS("%s: failed to set irq %d as a non-wake interrupt\n",
 			__func__, irq);
@@ -173,7 +173,7 @@ static int capella_cm3602_setup(struct capella_cm3602_data *ip)
 			__func__, pdata->p_out, rc);
 		goto fail_free_p_en;
 	}
-	set_irq_flags(irq, IRQF_VALID | IRQF_NOAUTOEN);
+	irq_set_status_flags(irq, IRQF_VALID | IRQF_NOAUTOEN);
 	rc = request_irq(irq,
 			capella_cm3602_irq_handler,
 			IRQF_TRIGGER_LOW | IRQF_TRIGGER_HIGH,
