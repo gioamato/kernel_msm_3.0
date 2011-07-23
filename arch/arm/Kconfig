@@ -66,7 +66,7 @@ config GENERIC_CLOCKEVENTS_BROADCAST
 
 config KTIME_SCALAR
 	bool
-	default y
+	default n
 
 config HAVE_TCM
 	bool
@@ -136,10 +136,10 @@ config GENERIC_LOCKBREAK
 
 config RWSEM_GENERIC_SPINLOCK
 	bool
-	default y
 
 config RWSEM_XCHGADD_ALGORITHM
 	bool
+	default y
 
 config ARCH_HAS_ILOG2_U32
 	bool
@@ -622,11 +622,13 @@ config ARCH_PXA
 	  Support for Intel/Marvell's PXA2xx/PXA3xx processor line.
 
 config ARCH_MSM
-	bool "Qualcomm MSM"
-	select HAVE_CLK
+	bool "Qualcomm MSM/QSD"
+	select ARCH_HAS_CPUFREQ
+	select GENERIC_GPIO
+	select GENERIC_TIME
 	select GENERIC_CLOCKEVENTS
 	select ARCH_REQUIRE_GPIOLIB
-	select CLKDEV_LOOKUP
+	select ARCH_HAS_BARRIERS if !ARCH_MSM7227
 	help
 	  Support for Qualcomm MSM/QSD based systems.  This runs on the
 	  apps processor of the MSM/QSD and depends on a shared memory
@@ -1033,6 +1035,19 @@ config ARM_TIMER_SP804
 
 source arch/arm/mm/Kconfig
 
+config DONT_RESERVE_FROM_MOVABLE_ZONE
+       def_bool y
+       depends on MEMORY_HOTPLUG
+
+config RESERVE_FIRST_PAGE
+       bool
+       default n
+       help
+         Reserve the first page at PHYS_OFFSET. The first
+         physical page is used by many platforms for warm
+         boot operations. Reserve this page so that it is
+         not allocated by the kernel.
+
 config IWMMXT
 	bool "Enable iWMMXt support"
 	depends on CPU_XSCALE || CPU_XSC3 || CPU_MOHAWK || CPU_PJ4
@@ -1233,6 +1248,19 @@ config ARM_ERRATA_754327
 	  continuously polls a memory location waiting to observe an update.
 	  This workaround defines cpu_relax() as smp_mb(), preventing correctly
 	  written polling loops from denying visibility of updates to memory.
+
+config KSAPI
+        tristate "KSAPI support (EXPERIMENTAL)"
+        depends on ARCH_MSM_SCORPION || ARCH_MSM_SCORPIONMP
+        default n
+        help
+          KSAPI: Performance monitoring tool for linux.
+          KSAPI records performance statistics for Snapdragon linux platform.
+          It uses the /proc FS as a means to exchange configuration data and
+          counter statistics. It can monitor the counter statistics for
+          Scorpion processor supported hardware performance counters on a per
+          thread basis or AXI counters on an overall system basis.
+
 
 endmenu
 
@@ -1537,6 +1565,13 @@ config HW_PERF_EVENTS
 	  Enable hardware performance counter support for perf events. If
 	  disabled, perf events will use software events only.
 
+config VMALLOC_RESERVE
+       hex "Reserved vmalloc space"
+       default 0x08000000
+       depends on MMU
+       help
+         Reserved vmalloc space if not specified on the kernel commandline.
+
 source "mm/Kconfig"
 
 config FORCE_MAX_ZONEORDER
@@ -1554,6 +1589,17 @@ config FORCE_MAX_ZONEORDER
 
 	  This config option is actually maximum order plus one. For example,
 	  a value of 11 means that the largest free memory block is 2^10 pages.
+
+config ARCH_MEMORY_PROBE
+       def_bool n
+       depends on MEMORY_HOTPLUG
+
+config ARCH_MEMORY_REMOVE
+       def_bool n
+       depends on MEMORY_HOTPLUG
+
+config DONT_RESERVE_FROM_MOVABLE_ZONE
+       def_bool n
 
 config LEDS
 	bool "Timer and CPU usage LEDs"
@@ -1637,6 +1683,17 @@ config UACCESS_WITH_MEMCPY
 
 	  However, if the CPU data cache is using a write-allocate mode,
 	  this option is unlikely to provide any performance gain.
+
+config CP_ACCESS
+       tristate "CP register access tool"
+       default m
+       help
+         Provide support for Coprocessor register access using /sys
+         interface. Read and write to CP registers from userspace
+         through sysfs interface. A sys file (cp_rw) will be created under
+         /sys/devices/system/cpaccess/cpaccess0.
+
+         If unsure, say N.
 
 config SECCOMP
 	bool
@@ -1930,6 +1987,14 @@ endif
 source "drivers/cpuidle/Kconfig"
 
 endmenu
+
+config CPU_FREQ_MSM
+        bool
+        depends on CPU_FREQ && ARCH_MSM
+        default y
+        help
+          This enables the CPUFreq driver for Qualcomm CPUs.
+          If in doubt, say Y.
 
 menu "Floating point emulation"
 
