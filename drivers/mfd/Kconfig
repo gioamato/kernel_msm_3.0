@@ -171,6 +171,22 @@ config MFD_TPS6586X
 	  This driver can also be built as a module.  If so, the module
 	  will be called tps6586x.
 
+config PMIC8058
+       tristate "PMIC8058 Power Management chip"
+       depends on I2C_SSBI && (ARCH_MSM7X30 || ARCH_MSM8X60)
+       default y if I2C_SSBI && (ARCH_MSM7X30 || ARCH_MSM8X60)
+       select MFD_CORE
+       help
+         Say yes here for Qualcomm PM8058 chip.
+
+config PMIC8901
+       tristate "PMIC8901 Power Management chip"
+       depends on I2C_SSBI && ARCH_MSM8X60
+       default y if I2C_SSBI && ARCH_MSM8X60
+       select MFD_CORE
+       help
+         Say yes here for Qualcomm PM8901 chip.
+
 config MENELAUS
 	bool "Texas Instruments TWL92330/Menelaus PM chip"
 	depends on I2C=y && ARCH_OMAP2
@@ -232,6 +248,40 @@ config TWL6030_PWM
 	help
 	  Say yes here if you want support for TWL6030 PWM.
 	  This is used to control charging LED brightness.
+
+config MARIMBA_CORE
+       tristate "Marimba Core"
+       depends on I2C && (ARCH_MSM7X30 || ARCH_MSM8X60)
+       default n
+       help
+         Enables the Marimba Core driver. The core driver provides
+         read/write capability to registers which are part of the
+         marimba core.
+
+config MARIMBA_CODEC
+       tristate "Marimba Codec"
+       depends on MARIMBA_CORE
+       default n
+       help
+        This driver programs Marimba Wideband Codec for input/output of
+        audio signal.
+
+config TIMPANI_CODEC
+       tristate "Timpani Codec"
+       depends on MARIMBA_CORE
+       default n
+       help
+        This driver programs Timpani Wideband Codec for input/output of
+        audio signal.
+
+config BAHAMA_CORE
+       tristate "Bahama Core"
+       depends on I2C && (ARCH_MSM7X30 || ARCH_MSM8X60)
+       default n
+       help
+         Enables the Bahama Core driver. The core driver provides
+         read/write capability to registers which are part of the
+         Bahama core.
 
 config MFD_STMPE
 	bool "Support STMicroelectronics STMPE"
@@ -730,6 +780,22 @@ config MFD_TPS65910
 
 config TPS65911_COMPARATOR
 	tristate
+
+config PMIC8058
+       tristate "PMIC8058 Power Management chip"
+       depends on I2C && ARCH_MSM7X30
+       default y if I2C && ARCH_MSM7X30
+       select MFD_CORE
+       help
+         Say yes here for Qualcomm PM8058 chip.
+
+config MARIMBA_TSADC
+       tristate "Support for Marimba Touchscreen ADC"
+       depends on MARIMBA_CORE && ARCH_MSM7X30
+       default y if MARIMBA_CORE
+       help
+         Say yes here if you want to include support for TSADC in the
+         Qualcomm Marimba chip.
 
 endif # MFD_SUPPORT
 
