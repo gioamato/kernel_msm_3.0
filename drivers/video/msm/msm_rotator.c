@@ -1068,7 +1068,7 @@ static int msm_rotator_finish(unsigned long arg)
 	return rc;
 }
 
-static int msm_rotator_ioctl(struct file *file,
+static long msm_rotator_ioctl(struct file *file,
 			     unsigned cmd, unsigned long arg)
 {
 	if (_IOC_TYPE(cmd) != MSM_ROTATOR_IOCTL_MAGIC)
