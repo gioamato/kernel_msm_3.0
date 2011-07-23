@@ -710,7 +710,7 @@ struct ov8810_waitevent{
 static struct ov8810_waitevent ov8810_event;
 
 static DECLARE_WAIT_QUEUE_HEAD(ov8810_wait_queue);
-DECLARE_MUTEX(ov8810_sem);
+DEFINE_SEMAPHORE(ov8810_sem);
 
 
 /*=============================================================*/

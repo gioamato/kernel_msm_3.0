@@ -24,8 +24,8 @@ static struct pm_qos_request_list *pm_qos_req;
 
 int add_axi_qos(void)
 {
-	pm_qos_req = pm_qos_add_request(PM_QOS_SYSTEM_BUS_FREQ,
-					PM_QOS_DEFAULT_VALUE);
+	pm_qos_add_request(pm_qos_req, PM_QOS_SYSTEM_BUS_FREQ,
+			PM_QOS_DEFAULT_VALUE);
 	if (!pm_qos_req) {
 		CDBG("request AXI bus QOS fails.\n");
 		return -1;
