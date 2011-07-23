@@ -19,7 +19,19 @@ obj-$(CONFIG_PHANTOM)		+= phantom.o
 obj-$(CONFIG_SENSORS_BH1780)	+= bh1780gli.o
 obj-$(CONFIG_SENSORS_BH1770)	+= bh1770glc.o
 obj-$(CONFIG_SENSORS_APDS990X)	+= apds990x.o
-obj-$(CONFIG_ANDROID_PMEM)	+= pmem.o
+ifeq ($(CONFIG_ARCH_MSM7227),y)
+        obj-$(CONFIG_ANDROID_PMEM)      += pmem_7x27.o
+else
+ifeq ($(CONFIG_ARCH_MSM7X30),y)
+        obj-$(CONFIG_ANDROID_PMEM)      += pmem_qcom.o
+else
+ifeq ($(CONFIG_ARCH_MSM8X60),y)
+        obj-$(CONFIG_ANDROID_PMEM)      += pmem_8x60.o
+else
+        obj-$(CONFIG_ANDROID_PMEM)      += pmem.o
+endif
+endif
+endif
 obj-$(CONFIG_SGI_IOC4)		+= ioc4.o
 obj-$(CONFIG_ENCLOSURE_SERVICES) += enclosure.o
 obj-$(CONFIG_KERNEL_DEBUGGER_CORE)	+= kernel_debugger.o
