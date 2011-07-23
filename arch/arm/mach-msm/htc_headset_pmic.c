@@ -224,7 +224,7 @@ static irqreturn_t htc_35mm_pmic_irq(int irq, void *data)
 	HS_DBG();
 
 	hi->hpin_irq_type ^= irq_mask;
-	set_irq_type(hi->pdata.hpin_irq, hi->hpin_irq_type);
+	irq_set_irq_type(hi->pdata.hpin_irq, hi->hpin_irq_type);
 
 	wake_lock_timeout(&hi->hs_wake_lock, HS_WAKE_LOCK_TIMEOUT);
 	queue_delayed_work(detect_wq, &detect_35mm_work, hi->hpin_debounce);
@@ -323,7 +323,7 @@ static int htc_headset_pmic_probe(struct platform_device *pdev)
 			goto err_request_detect_irq;
 		}
 
-		ret = set_irq_wake(hi->pdata.hpin_irq, 1);
+		ret = irq_set_irq_wake(hi->pdata.hpin_irq, 1);
 		if (ret < 0)
 			HS_ERR("Failed to set PMIC HPIN IRQ wake");
 	}

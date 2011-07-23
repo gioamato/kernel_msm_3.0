@@ -20,6 +20,7 @@
 #include <linux/err.h>
 #include <mach/msm_reqs.h>
 
+#if 0
 struct pm_qos_request_list {
         struct list_head list;
         union {
@@ -29,7 +30,7 @@ struct pm_qos_request_list {
         };
         int pm_qos_class;
 };
-
+#endif
 
 struct pm_qos_object {
         struct pm_qos_request_list requests;

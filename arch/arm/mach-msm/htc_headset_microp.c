@@ -317,7 +317,7 @@ static int htc_headset_microp_probe(struct platform_device *pdev)
 				ret);
 			goto err_request_microp_detect_irq;
 		}
-		ret = set_irq_wake(hi->pdata.hpin_irq, 1);
+		ret = irq_set_irq_wake(hi->pdata.hpin_irq, 1);
 		if (ret < 0)
 			goto err_set_microp_detect_irq_wake;
 	}
@@ -354,7 +354,7 @@ static int htc_headset_microp_probe(struct platform_device *pdev)
 				ret);
 			goto err_request_microp_button_irq;
 		}
-		ret = set_irq_wake(hi->pdata.remote_irq, 1);
+		ret = irq_set_irq_wake(hi->pdata.remote_irq, 1);
 		if (ret < 0)
 			goto err_set_microp_button_irq_wake;
 	}

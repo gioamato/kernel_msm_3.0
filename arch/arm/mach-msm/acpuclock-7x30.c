@@ -53,9 +53,6 @@
 #define PLL2_1540_MHZ		80
 #define PLL2_1560_MHZ		81
 
-#define dprintk(msg...) \
-	cpufreq_debug_printk(CPUFREQ_DEBUG_DRIVER, "cpufreq-msm", msg)
-
 #define VREF_SEL     1	/* 0: 0.625V (50mV step), 1: 0.3125V (25mV step). */
 #define V_STEP       (25 * (2 - VREF_SEL)) /* Minimum voltage step size. */
 #define VREG_DATA    (VREG_CONFIG | (VREF_SEL << 5))
@@ -254,7 +251,7 @@ int acpuclk_set_rate(unsigned long rate, enum setrate_reason reason)
 		}
 	}
 
-	dprintk("Switching from ACPU rate %u KHz -> %u KHz\n",
+	pr_debug("Switching from ACPU rate %u KHz -> %u KHz\n",
 	       strt_s->acpu_clk_khz, tgt_s->acpu_clk_khz);
 
 	/* Increase the AXI bus frequency if needed. This must be done before
@@ -270,7 +267,7 @@ int acpuclk_set_rate(unsigned long rate, enum setrate_reason reason)
 
 	/* Make sure target PLL is on. */
 	if (strt_s->src != tgt_s->src && tgt_s->src >= 0) {
-		dprintk("Enabling PLL %d\n", tgt_s->src);
+		pr_debug("Enabling PLL %d\n", tgt_s->src);
 		pll_enable(tgt_s->src);
 	}
 
@@ -285,7 +282,7 @@ int acpuclk_set_rate(unsigned long rate, enum setrate_reason reason)
 
 	/* Turn off previous PLL if not used. */
 	if (strt_s->src != tgt_s->src && strt_s->src >= 0) {
-		dprintk("Disabling PLL %d\n", strt_s->src);
+		pr_debug("Disabling PLL %d\n", strt_s->src);
 		pll_disable(strt_s->src);
 	}
 
@@ -309,7 +306,7 @@ int acpuclk_set_rate(unsigned long rate, enum setrate_reason reason)
 		}
 	}
 
-	dprintk("ACPU speed change complete\n");
+	pr_debug("ACPU speed change complete\n");
 out:
 	if (reason == SETRATE_CPUFREQ)
 		mutex_unlock(&drv_state.lock);

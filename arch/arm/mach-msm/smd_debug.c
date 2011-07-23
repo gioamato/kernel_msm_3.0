@@ -423,7 +423,7 @@ enum {
 
 #define SLEEP_STAT_ATTR(_name)                         \
 {                                       \
-	.attr = { .name = #_name, .mode = S_IRUGO, .owner = THIS_MODULE },  \
+	.attr = { .name = #_name, .mode = S_IRUGO, },  \
 	.show = show_mem_sleep_stat_attr,                  \
 	.store = NULL,                              \
 }

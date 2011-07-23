@@ -299,7 +299,7 @@ int __init glacier_init_mmc(unsigned int sys_rev)
 	if (IS_ERR(vreg_sdslot))
 		return PTR_ERR(vreg_sdslot);
 
-	set_irq_wake(MSM_GPIO_TO_INT(GLACIER_SDMC_CD_N_SYS), 1);
+	irq_set_irq_wake(MSM_GPIO_TO_INT(GLACIER_SDMC_CD_N_SYS), 1);
 
 	msm_add_sdcc(4, &glacier_sdslot_data,
 		MSM_GPIO_TO_INT(GLACIER_SDMC_CD_N_SYS),

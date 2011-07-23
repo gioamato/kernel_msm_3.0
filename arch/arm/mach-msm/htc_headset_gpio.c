@@ -86,7 +86,7 @@ static irqreturn_t detect_irq_handler(int irq, void *dev_id)
 	do {
 		gpio1 = gpio_get_value(hi->pdata.hpin_gpio);
 		irq_type = gpio1 ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
-		set_irq_type(hi->hpin_irq, irq_type);
+		irq_set_irq_type(hi->hpin_irq, irq_type);
 		gpio2 = gpio_get_value(hi->pdata.hpin_gpio);
 	} while (gpio1 != gpio2 && retry_limit-- > 0);
 
@@ -173,7 +173,7 @@ static int htc_headset_gpio_probe(struct platform_device *pdev)
 		if (ret < 0)
 			goto err_request_irq;
 
-		ret = set_irq_wake(hi->hpin_irq, 1);
+		ret = irq_set_irq_wake(hi->hpin_irq, 1);
 		if (ret < 0)
 			goto err_set_irq_wake;
 	}

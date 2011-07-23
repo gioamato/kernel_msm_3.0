@@ -27,6 +27,7 @@
 #include <linux/debugfs.h>
 #include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/sched.h>
 
 #include <mach/msm_smd.h>
 #include <mach/msm_iomap.h>

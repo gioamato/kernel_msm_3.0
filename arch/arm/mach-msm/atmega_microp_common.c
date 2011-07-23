@@ -714,7 +714,7 @@ static int microp_i2c_probe(struct i2c_client *client
 			dev_err(&client->dev, "request_irq failed\n");
 			goto err_intr;
 		}
-		ret = set_irq_wake(client->irq, 1);
+		ret = irq_set_irq_wake(client->irq, 1);
 		if (ret) {
 			dev_err(&client->dev, "set_irq_wake failed\n");
 			goto err_intr;
@@ -778,33 +778,33 @@ static struct i2c_driver microp_i2c_driver = {
 	.remove = __devexit_p(microp_i2c_remove),
 };
 
-static void microp_irq_ack(unsigned int irq)
+static void microp_irq_ack(struct irq_data *d)
 {
 	;
 }
 
-static void microp_irq_mask(unsigned int irq)
+static void microp_irq_mask(struct irq_data *d)
 {
 	;
 }
 
-static void microp_irq_unmask(unsigned int irq)
+static void microp_irq_unmask(struct irq_data *d)
 {
 	;
 }
 
-static int microp_irq_set_wake(unsigned int irq, unsigned int on)
+static int microp_irq_set_wake(struct irq_data *d, unsigned int on)
 {
 	return 0;
 }
 
 static struct irq_chip microp_irq_chip = {
 	.name = "microp",
-	.disable = microp_irq_mask,
-	.ack = microp_irq_ack,
-	.mask = microp_irq_mask,
-	.unmask = microp_irq_unmask,
-	.set_wake = microp_irq_set_wake,
+	.irq_disable = microp_irq_mask,
+	.irq_ack = microp_irq_ack,
+	.irq_mask = microp_irq_mask,
+	.irq_unmask = microp_irq_unmask,
+	.irq_set_wake = microp_irq_set_wake,
 };
 
 static int __init microp_common_init(void)

@@ -2259,10 +2259,8 @@ static void __init glacier_fixup(struct machine_desc *desc, struct tag *tags,
 
 	mi->nr_banks = 2;
 	mi->bank[0].start = MSM_LINUX_BASE1;
-	mi->bank[0].node = PHYS_TO_NID(MSM_LINUX_BASE1);
 	mi->bank[0].size = MSM_LINUX_SIZE1;
 	mi->bank[1].start = MSM_LINUX_BASE2;
-	mi->bank[1].node = PHYS_TO_NID(MSM_LINUX_BASE2);
 	mi->bank[1].size = MSM_LINUX_SIZE2;
 
 	if (mem == 768)

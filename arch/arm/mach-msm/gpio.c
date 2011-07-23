@@ -443,7 +443,7 @@ static int msm_gpio_irq_set_type(struct irq_data *d, unsigned int flow_type)
 {
 	int ret;
 	unsigned long irq_flags;
-	struct msm_gpio_chip *msm_chip = irq_data_get_irq_chip_data(irq);
+	struct msm_gpio_chip *msm_chip = irq_data_get_irq_chip_data(d);
 	spin_lock_irqsave(&msm_chip->chip.lock, irq_flags);
 	ret = msm_gpio_configure(&msm_chip->chip, d->irq - FIRST_GPIO_IRQ, flow_type);
 	spin_unlock_irqrestore(&msm_chip->chip.lock, irq_flags);
@@ -467,7 +467,7 @@ static void msm_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
 			generic_handle_irq(FIRST_GPIO_IRQ + msm_chip->chip.start + j);
 		}
 	}
-	desc->irq_data.chip->irq_ack(&descc->irq_data);
+	desc->irq_data.chip->irq_ack(&desc->irq_data);
 }
 
 static struct irq_chip msm_gpio_irq_chip = {
@@ -601,9 +601,9 @@ static int __init msm_init_gpio(void)
 			if (j < ARRAY_SIZE(msm_gpio_chips) - 1)
 				j++;
 		}
-		set_irq_chip_data(i, &msm_gpio_chips[j]);
-		set_irq_chip(i, &msm_gpio_irq_chip);
-		set_irq_handler(i, handle_edge_irq);
+		irq_set_chip_data(i, &msm_gpio_chips[j]);
+		irq_set_chip(i, &msm_gpio_irq_chip);
+		irq_set_handler(i, handle_edge_irq);
 		set_irq_flags(i, IRQF_VALID);
 	}
 
@@ -612,17 +612,17 @@ static int __init msm_init_gpio(void)
 		register_gpio_chip(&msm_gpio_chips[i].chip);
 	}
 
-	set_irq_chained_handler(INT_GPIO_GROUP1, msm_gpio_irq_handler);
-	set_irq_chained_handler(INT_GPIO_GROUP2, msm_gpio_irq_handler);
-	set_irq_wake(INT_GPIO_GROUP1, 1);
-	set_irq_wake(INT_GPIO_GROUP2, 2);
+	irq_set_chained_handler(INT_GPIO_GROUP1, msm_gpio_irq_handler);
+	irq_set_chained_handler(INT_GPIO_GROUP2, msm_gpio_irq_handler);
+	irq_set_irq_wake(INT_GPIO_GROUP1, 1);
+	irq_set_irq_wake(INT_GPIO_GROUP2, 2);
 	return 0;
 }
 
 int gpio_configure(unsigned int gpio, unsigned long flags)
 {
 	unsigned long irq_flags;
-	struct msm_gpio_chip *msm_chip = get_irq_chip_data((gpio + FIRST_GPIO_IRQ));
+	struct msm_gpio_chip *msm_chip = irq_get_chip_data((gpio + FIRST_GPIO_IRQ));
 	spin_lock_irqsave(&msm_chip->chip.lock, irq_flags);
 	msm_gpio_configure(&msm_chip->chip, gpio, flags);
 	spin_unlock_irqrestore(&msm_chip->chip.lock, irq_flags);

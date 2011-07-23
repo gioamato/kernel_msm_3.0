@@ -636,8 +636,7 @@ int msm_snddev_enable_sidetone(u32 dev_id, u32 enable)
 }
 EXPORT_SYMBOL(msm_snddev_enable_sidetone);
 
-static int audio_dev_ctrl_ioctl(struct inode *inode, struct file *file,
-	unsigned int cmd, unsigned long arg)
+static long audio_dev_ctrl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	int rc = 0;
 	struct audio_dev_ctrl_state *dev_ctrl = file->private_data;
@@ -755,7 +754,7 @@ static const struct file_operations audio_dev_ctrl_fops = {
 	.owner = THIS_MODULE,
 	.open = audio_dev_ctrl_open,
 	.release = audio_dev_ctrl_release,
-	.ioctl = audio_dev_ctrl_ioctl,
+	.unlocked_ioctl = audio_dev_ctrl_ioctl,
 };
 
 

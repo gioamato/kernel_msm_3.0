@@ -1393,7 +1393,7 @@ static int smem_log_release(struct inode *ip, struct file *fp)
 	return 0;
 }
 
-static int smem_log_ioctl(struct inode *ip, struct file *fp,
+static long smem_log_ioctl(struct file *filp,
 			  unsigned int cmd, unsigned long arg);
 
 static const struct file_operations smem_log_fops = {
@@ -1402,7 +1402,7 @@ static const struct file_operations smem_log_fops = {
 	.write = smem_log_write,
 	.open = smem_log_open,
 	.release = smem_log_release,
-	.ioctl = smem_log_ioctl,
+	.unlocked_ioctl = smem_log_ioctl,
 };
 
 static const struct file_operations smem_log_bin_fops = {
@@ -1411,10 +1411,10 @@ static const struct file_operations smem_log_bin_fops = {
 	.write = smem_log_write_bin,
 	.open = smem_log_open,
 	.release = smem_log_release,
-	.ioctl = smem_log_ioctl,
+	.unlocked_ioctl = smem_log_ioctl,
 };
 
-static int smem_log_ioctl(struct inode *ip, struct file *fp,
+static long smem_log_ioctl(struct file *fp,
 			  unsigned int cmd, unsigned long arg)
 {
 	struct smem_log_inst *inst;

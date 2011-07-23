@@ -298,7 +298,7 @@ int __init spade_init_mmc(unsigned int sys_rev)
 	if (IS_ERR(vreg_sdslot))
 		return PTR_ERR(vreg_sdslot);
 
-	set_irq_wake(MSM_GPIO_TO_INT(SPADE_SDMC_CD_N_TO_SYS), 1);
+	irq_set_irq_wake(MSM_GPIO_TO_INT(SPADE_SDMC_CD_N_TO_SYS), 1);
 
 	msm_add_sdcc(4, &spade_sdslot_data,
 			MSM_GPIO_TO_INT(SPADE_SDMC_CD_N_TO_SYS),
