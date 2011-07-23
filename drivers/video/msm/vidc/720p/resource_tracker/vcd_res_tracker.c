@@ -343,7 +343,7 @@ u32 res_trk_power_up(void)
 {
 	VCDRES_MSG_MED("res_trk_power_up():: "
 		"Calling AXI add requirement\n");
-	qos_req_list = pm_qos_add_request(PM_QOS_SYSTEM_BUS_FREQ,
+	pm_qos_add_request(qos_req_list,PM_QOS_SYSTEM_BUS_FREQ,
 		PM_QOS_DEFAULT_VALUE);
 	if (IS_ERR_OR_NULL(qos_req_list))	{
 		VCDRES_MSG_ERROR("Request AXI bus QOS fails.");

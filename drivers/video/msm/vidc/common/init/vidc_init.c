@@ -58,7 +58,7 @@ static const struct file_operations vidc_fops = {
 	.owner = THIS_MODULE,
 	.open = NULL,
 	.release = NULL,
-	.ioctl = NULL,
+	.unlocked_ioctl = NULL,
 };
 
 struct workqueue_struct *vidc_wq;

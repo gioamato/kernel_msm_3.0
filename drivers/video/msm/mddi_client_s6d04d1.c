@@ -18,6 +18,7 @@
 #include <linux/gpio.h>
 #include <linux/leds.h>
 #include <linux/delay.h>
+#include <linux/sched.h>
 #include <linux/wakelock.h>
 #include <linux/slab.h>
 #include <mach/msm_fb.h>

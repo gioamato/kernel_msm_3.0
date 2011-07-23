@@ -1068,7 +1068,7 @@ static int msm_rotator_finish(unsigned long arg)
 	return rc;
 }
 
-static int msm_rotator_ioctl(struct inode *inode, struct file *file,
+static int msm_rotator_ioctl(struct file *file,
 			     unsigned cmd, unsigned long arg)
 {
 	if (_IOC_TYPE(cmd) != MSM_ROTATOR_IOCTL_MAGIC)
@@ -1091,7 +1091,7 @@ static int msm_rotator_ioctl(struct inode *inode, struct file *file,
 
 static const struct file_operations msm_rotator_fops = {
 	.owner = THIS_MODULE,
-	.ioctl = msm_rotator_ioctl,
+	.unlocked_ioctl = msm_rotator_ioctl,
 };
 
 static int __devinit msm_rotator_probe(struct platform_device *pdev)

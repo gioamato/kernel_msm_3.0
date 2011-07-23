@@ -61,7 +61,7 @@ static struct switch_dev venc_switch = {
 static struct vid_enc_dev *vid_enc_device_p;
 static dev_t vid_enc_dev_num;
 static struct class *vid_enc_class;
-static int vid_enc_ioctl(struct inode *inode, struct file *file,
+static long vid_enc_ioctl(struct file *file,
 	unsigned cmd, unsigned long arg);
 static int stop_cmd;
 static struct perf_lock media_perf_lock;
@@ -584,7 +584,7 @@ static const struct file_operations vid_enc_fops = {
 	.owner = THIS_MODULE,
 	.open = vid_enc_open,
 	.release = vid_enc_release,
-	.ioctl = vid_enc_ioctl
+	.unlocked_ioctl = vid_enc_ioctl
 };
 
 void vid_enc_interrupt_deregister(void)
@@ -727,7 +727,7 @@ static void __exit vid_enc_exit(void)
 	kfree(vid_enc_device_p);
 	INFO("msm_vidc_enc: Return from %s()", __func__);
 }
-static int vid_enc_ioctl(struct inode *inode, struct file *file,
+static long vid_enc_ioctl(struct file *file,
 		unsigned cmd, unsigned long u_arg)
 {
 	struct video_client_ctx *client_ctx = NULL;

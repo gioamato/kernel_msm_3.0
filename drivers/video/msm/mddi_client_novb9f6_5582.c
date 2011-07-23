@@ -18,6 +18,7 @@
 #include <linux/interrupt.h>
 #include <linux/gpio.h>
 #include <linux/wakelock.h>
+#include <linux/sched.h>
 #include <linux/slab.h>
 #include <mach/msm_fb.h>
 #include <mach/debug_display.h>

@@ -17,6 +17,7 @@
 #include <linux/delay.h>
 #include <linux/interrupt.h>
 #include <linux/gpio.h>
+#include <linux/sched.h>
 #include <linux/wakelock.h>
 #include <linux/slab.h>
 #include <mach/msm_fb.h>
