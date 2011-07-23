@@ -569,7 +569,7 @@ void aic3254_set_mode(int config, int mode)
 	mutex_unlock(&lock);
 }
 
-static int aic3254_ioctl(struct file *file,
+static long aic3254_ioctl(struct file *file,
 		unsigned int cmd, unsigned long argc)
 {
 	struct AIC3254_PARAM para;
