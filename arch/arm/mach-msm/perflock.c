@@ -53,8 +53,7 @@ static int debug_mask = PERF_LOCK_DEBUG | PERF_EXPIRE_DEBUG |
 #else
 static int debug_mask = PERF_CPUFREQ_LOCK_DEBUG | PERF_SCREEN_ON_POLICY_DEBUG;
 #endif
-module_param_call(debug_mask, param_set_int, param_get_int,
-		&debug_mask, S_IWUSR | S_IRUGO);
+module_param(debug_mask, int,  S_IWUSR | S_IRUGO);
 
 static unsigned int get_perflock_speed(void);
 static void print_active_locks(void);
