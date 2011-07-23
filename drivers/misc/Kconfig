@@ -536,6 +536,16 @@ config APANIC_PLABEL
 	 If your platform uses a different flash partition label for storing
  	 crashdumps, enter it here.
 
+config PMIC8058_PWM
+        tristate "Qualcomm PM8058 PWM support"
+        depends on PMIC8058
+        default y
+        help
+          This option enables device driver support for the PWM channels
+          on Qualcomm PM8058 chip. Pulse Width Modulation is used for
+          purposes including software controlled brightness of backlight,
+          motor control, and waveform generation.
+
 config SENSORS_BMA150_SPI
         tristate "BMA150 G-sensor Driver"
         depends on MICROP_COMMON
