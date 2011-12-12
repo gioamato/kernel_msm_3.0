@@ -97,7 +97,11 @@ static struct map_desc msm_io_desc[] __initdata = {
 #ifdef CONFIG_ARCH_MSM7X30
 	MSM_DEVICE(TMR),
 #else
+#ifndef CONFIG_ARCH_QSD8X50
+
 	MSM_DEVICE(GPT),
+#endif
+	
 #endif
 	MSM_DEVICE(DMOV),
 	MSM_DEVICE(GPIO1),
