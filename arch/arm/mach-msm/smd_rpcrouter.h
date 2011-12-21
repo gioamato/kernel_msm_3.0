@@ -163,6 +163,8 @@ struct msm_rpc_reply {
 };
 #endif
 
+#define MAX_REPLY_ROUTE 4
+
 struct msm_rpc_endpoint {
 	struct list_head list;
 
@@ -217,6 +219,16 @@ struct msm_rpc_endpoint {
 #endif
 	/* device node if this endpoint is accessed via userspace */
 	dev_t dev;
+
+
+	/* RPC_REPLY writes must be routed to the pid/cid of the
+		 * RPC_CALL they are in reply to.  Keep a cache of valid
+		 * xid/pid/cid groups.  pid 0xffffffff -> not valid.
+		 */
+		unsigned next_rroute;
+		struct msm_reply_route *rroute[MAX_REPLY_ROUTE];
+		spinlock_t rroute_loc;
+
 };
 
 /* shared between smd_rpcrouter*.c */

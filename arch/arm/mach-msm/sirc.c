@@ -163,7 +163,8 @@ static void sirc_irq_handler(unsigned int irq, struct irq_desc *desc)
 		;
 	generic_handle_irq(sirq+FIRST_SIRC_IRQ);
 
-	desc->chip->ack(irq);
+	//desc->chip->ack(irq);
+	desc->irq_data.chip->irq_ack(&desc->irq_data);
 }
 
 void msm_sirc_enter_sleep(void)
@@ -184,11 +185,11 @@ void msm_sirc_exit_sleep(void)
 
 static struct irq_chip sirc_irq_chip = {
 	.name      = "sirc",
-	.ack       = sirc_irq_ack,
-	.mask      = sirc_irq_mask,
-	.unmask    = sirc_irq_unmask,
-	.set_wake  = sirc_irq_set_wake,
-	.set_type  = sirc_irq_set_type,
+	.irq_ack       = sirc_irq_ack,
+	.irq_mask      = sirc_irq_mask,
+	.irq_unmask    = sirc_irq_unmask,
+	.irq_set_wake  = sirc_irq_set_wake,
+	.irq_set_type  = sirc_irq_set_type,
 };
 
 void __init msm_init_sirc(void)
@@ -199,15 +200,15 @@ void __init msm_init_sirc(void)
 	wake_enable = 0;
 
 	for (i = FIRST_SIRC_IRQ; i < FIRST_SIRC_IRQ + NR_SIRC_IRQS; i++) {
-		set_irq_chip(i, &sirc_irq_chip);
-		set_irq_handler(i, handle_edge_irq);
+		irq_set_chip(i, &sirc_irq_chip);
+		irq_set_handler(i, handle_edge_irq);
 		set_irq_flags(i, IRQF_VALID);
 	}
 
 	for (i = 0; i < ARRAY_SIZE(sirc_reg_table); i++) {
-		set_irq_chained_handler(sirc_reg_table[i].cascade_irq,
+		irq_set_chained_handler(sirc_reg_table[i].cascade_irq,
 					sirc_irq_handler);
-		set_irq_wake(sirc_reg_table[i].cascade_irq, 1);
+		irq_set_irq_wake(sirc_reg_table[i].cascade_irq, 1);
 #if defined(CONFIG_MSM_FIQ_SUPPORT)
 		msm_fiq_select(sirc_reg_table[i].cascade_fiq);
 		msm_fiq_enable(sirc_reg_table[i].cascade_fiq);

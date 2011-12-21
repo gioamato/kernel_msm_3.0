@@ -145,7 +145,10 @@ static struct map_desc msm_io_desc[] __initdata = {
 		.length =   MSM_SHARED_RAM_SIZE,
 		.type =     MT_DEVICE,
 	},
+#ifndef CONFIG_ARCH_QSD8X50
+
 	MSM_DEVICE(SDC2),
+#endif
 };
 
 void __init msm_map_common_io(void)

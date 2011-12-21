@@ -76,7 +76,7 @@ static int is_rpc_connect(void)
 	return 0;
 }
 
-int turn_mic_bias_on(int on)
+int _turn_mic_bias_on(int on)
 {
 	D("%s called %d\n", __func__, on);
 	if (the_ops->enable_mic_bias)
@@ -252,7 +252,8 @@ static long acoustic_ioctl(struct file *file, unsigned int cmd,
 			int ret;
 		} adie_rep;
 
-		D("ioctl: ACOUSTIC_UPDATE_ADIE called %d.\n", current->pid);
+		// FIXME: Get proper PID
+		D("ioctl: ACOUSTIC_UPDATE_ADIE called %d.\n", -1);
 
 		adie_req.id = cpu_to_be32(-1); /* update all codecs */
 		rc = msm_rpc_call_reply(endpoint,
