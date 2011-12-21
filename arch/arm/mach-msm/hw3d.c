@@ -285,7 +285,7 @@ static void locked_hw3d_revoke(struct hw3d_info *info)
 	mod_timer(&info->revoke_timer, jiffies + REVOKE_TIMEOUT);
 }
 
-bool is_msm_hw3d_file(struct file *file)
+bool _is_msm_hw3d_file(struct file *file)
 {
 	struct hw3d_info *info = hw3d_info;
 	if (MAJOR(file->f_dentry->d_inode->i_rdev) == MAJOR(info->devno) &&
@@ -294,14 +294,14 @@ bool is_msm_hw3d_file(struct file *file)
 	return 0;
 }
 
-void put_msm_hw3d_file(struct file *file)
+void _put_msm_hw3d_file(struct file *file)
 {
 	if (!is_msm_hw3d_file(file))
 		return;
 	fput(file);
 }
 
-int get_msm_hw3d_file(int fd, uint32_t *offs, unsigned long *pbase,
+int _get_msm_hw3d_file(int fd, uint32_t *offs, unsigned long *pbase,
 		      unsigned long *len, struct file **filp)
 {
 	struct hw3d_info *info = hw3d_info;
